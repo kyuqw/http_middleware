@@ -13,6 +13,7 @@ class MiddlewareClient extends http.BaseClient with BaseClientMixin {
   @protected
   final http.Client client;
   @protected
+  @visibleForTesting
   final List<Middleware> middlewares;
   @protected
   final BaseMiddlewareChain middlewareChain;
@@ -27,13 +28,13 @@ class MiddlewareClient extends http.BaseClient with BaseClientMixin {
       _middlewares = List.from(middlewares);
       _middlewares.addAll(client.middlewares);
     }
-    BaseMiddlewareChain middlewareChain = ClientMiddlewareChain(client);
+    BaseMiddlewareChain middlewareChain = ClientMiddlewareChain(_client);
     // TODO: MiddlewareClient.build make optional NonStreamedResponseMiddleware??
     middlewareChain = MiddlewareChain(NonStreamedResponseMiddleware(), middlewareChain);
     for (final m in _middlewares.reversed) {
       middlewareChain = MiddlewareChain(m, middlewareChain);
     }
-    return MiddlewareClient._(_client, _middlewares, middlewareChain);
+    return MiddlewareClient._(_client, List.unmodifiable(_middlewares), middlewareChain);
   }
 
   /// call [client] send method without [middlewares].
@@ -109,10 +110,10 @@ class NonStreamedResponseMiddleware extends Middleware {
   static String header = 'NonStreamedResponseMiddleware';
 
   @override
-  FutureOr<http.BaseResponse> interceptRequestCall(http.BaseRequest request, next) async {
+  FutureOr<http.BaseResponse> interceptNextCall(http.BaseRequest request, next) async {
     final needNonStreamed = needNonStreamedResponse(request);
     if (needNonStreamed) request.headers.remove(header);
-    final response = await super.interceptRequestCall(request, next);
+    final response = await super.interceptNextCall(request, next);
     if (needNonStreamed && response is http.StreamedResponse) return http.Response.fromStream(response);
     return response;
   }

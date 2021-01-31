@@ -3,9 +3,8 @@ import 'package:meta/meta.dart';
 
 import '../middleware.dart';
 
-
 /// [LogMiddleware] is used to log [BaseRequest] & [Response] info during network requests.
-class LogMiddleware extends SeparatedResponseMiddleware {
+class LogMiddleware extends Middleware {
   final bool logRequest;
   final bool logRequestHeaders;
   final bool logRequestBody;
@@ -31,9 +30,9 @@ class LogMiddleware extends SeparatedResponseMiddleware {
   }
 
   @override
-  FutureOr<BaseResponse> interceptNonStreamedResponse(Response response) {
+  FutureOr<BaseResponse> interceptResponse(BaseResponse response) {
     if (logResponse) printResponse(response);
-    return super.interceptNonStreamedResponse(response);
+    return super.interceptResponse(response);
   }
 
   @protected
@@ -46,12 +45,12 @@ class LogMiddleware extends SeparatedResponseMiddleware {
   }
 
   @protected
-  void printResponse(Response response) {
+  void printResponse(BaseResponse response) {
     final sb = StringBuffer();
     final request = response.request;
     sb.writeln('${response.statusCode} ${request.method} ${request.url}');
     if (logResponseHeaders && (response.headers?.isNotEmpty ?? false)) sb.writeln('headers: ${response.headers}');
-    if (logResponseBody && response.contentLength > 0) sb.writeln('body: ${response.body}');
+    if (logResponseBody && response is Response && response.contentLength > 0) sb.writeln('body: ${response.body}');
     logMethod(sb.toString());
   }
 }

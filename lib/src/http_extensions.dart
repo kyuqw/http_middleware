@@ -13,16 +13,16 @@ extension HttpMethodExtensions on HttpMethod {
 }
 
 extension ClientExtensions on http.BaseClient {
+  /// [url] must be a [String] or [Uri].
   Future<http.Response> fetch(
-    String url, {
+    Uri url, {
     HttpMethod? method,
     Map<String, String>? headers,
     body,
     Map<String, dynamic /*String|Iterable<String>*/ >? queryParameters,
   }) {
-    assert(url.isNotEmpty);
-    url = utils.createUrl(url, queryParameters: queryParameters);
-    return _sendUnstreamed((method ?? HttpMethod.get).string, url, headers, body);
+    final _url = utils.mergeUrlQueryParameters(url, queryParameters);
+    return _sendUnstreamed((method ?? HttpMethod.get).string, _url, headers, body);
   }
 
   /// Sends a non-streaming [Request] and returns a non-streaming [Response].

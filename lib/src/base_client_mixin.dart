@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' show BaseClient, BaseRequest, Request, Response;
 
+import 'utils.dart';
+
 /// [BaseClientMixin] extents [BaseClient] and override basic request methods throw [sendNonStreamed].
 mixin BaseClientMixin implements BaseClient {
   @override
@@ -41,7 +43,7 @@ mixin BaseClientMixin implements BaseClient {
 
 /// Create a non-streaming [Request] from params.
 Request createRequest(String method, url, Map<String, String>? headers, [body, Encoding? encoding]) {
-  var request = Request(method, _fromUriOrString(url));
+  var request = Request(method, urlFromUriOrString(url));
 
   if (headers != null) request.headers.addAll(headers);
   if (encoding != null) request.encoding = encoding;
@@ -58,5 +60,3 @@ Request createRequest(String method, url, Map<String, String>? headers, [body, E
   }
   return request;
 }
-
-Uri _fromUriOrString(uri) => uri is String ? Uri.parse(uri) : uri as Uri;

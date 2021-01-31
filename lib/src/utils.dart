@@ -1,25 +1,46 @@
 import 'package:http/http.dart' as http;
 
-/// [queryParameters] value must be a [String] or [Iterable] of [String].
-String createUrl(String url, {Map<String, dynamic /*String|Iterable<String>*/ >? queryParameters}) {
-  assert(queryParameters == null || queryParameters is String || queryParameters is Iterable<String>);
-  var _url = Uri.parse(url);
-  Map<String, List<String>>? parameters = _url.queryParametersAll;
-  if (queryParameters != null && queryParameters.isNotEmpty) {
-    parameters = Map<String, List<String>>.from(parameters); // parameters is unmodifiable
+/// [url] must be a [String] or [Uri].
+/// [queryParameters] [Map.values] must be a [String] or [Iterable] of [String].
+Uri mergeUrlQueryParameters(dynamic url, Map<String, dynamic /*String|Iterable<String>*/ >? queryParameters) {
+  final _url = urlFromUriOrString(url);
+  if (queryParameters == null || queryParameters.isEmpty) return _url;
 
-    queryParameters.forEach((key, value) {
-      final values = parameters![key] ?? <String>[];
-      if (value == null || value is String) {
-        values.add(value);
-      } else {
-        values.addAll(value);
+  final parameters = Map<String, List<String>>.from(_url.queryParametersAll); // parameters is unmodifiable
+  queryParameters.forEach((key, value) {
+    final values = List<String>.from(parameters[key] ?? []);
+    parameters[key] = values;
+    if (value == null || value is String) {
+      values.add(value ?? '');
+    } else {
+      values.addAll(value);
+    }
+    if (values.isEmpty) values.add('');
+  });
+  return _url.replace(queryParameters: parameters);
+}
+
+Uri urlFromUriOrString(uri) => uri is String ? Uri.parse(uri) : uri as Uri;
+
+extension UriExtensions on Uri {
+  /// Return Uri that differs from this only sorted queryParameters.
+  ///
+  /// If this [Uri] does not have a queryParameters, it is itself returned.
+  Uri sortQueryParams() {
+    final uri = this;
+    final params = uri.queryParametersAll;
+    if (params.isEmpty) return uri;
+
+    final data = <String, List<String>>{};
+    for (final key in params.keys.toList()..sort()) {
+      var values = params[key]!;
+      if (values.length > 1) {
+        values = List.from(values)..sort();
       }
-    });
+      data[key] = values;
+    }
+    return uri.replace(queryParameters: data);
   }
-  if (parameters.isEmpty) parameters = null;
-  _url = Uri(scheme: _url.scheme, host: _url.host, path: _url.path, queryParameters: parameters, port: _url.port);
-  return _url.toString();
 }
 
 bool isResponseOk(int statusCode) {
