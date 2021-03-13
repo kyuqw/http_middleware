@@ -12,15 +12,16 @@ extension HttpMethodExtensions on HttpMethod {
   String get string => _httpMethodToString(this);
 }
 
-extension ClientExtensions on http.BaseClient {
+extension ClientExtensions on http.Client {
   /// [url] must be a [String] or [Uri].
   Future<http.Response> fetch(
-    Uri url, {
+    dynamic url, {
     HttpMethod? method,
     Map<String, String>? headers,
     body,
     Map<String, dynamic /*String|Iterable<String>*/ >? queryParameters,
   }) {
+    assert(url != null);
     final _url = utils.mergeUrlQueryParameters(url, queryParameters);
     return _sendUnstreamed((method ?? HttpMethod.get).string, _url, headers, body);
   }
@@ -46,11 +47,11 @@ extension BaseResponseExtensions on http.BaseResponse {
 
 extension ResponseExtensions on http.Response {
   T? jsonModel<T>(JsonModelFactory<T> factoryMethod, {T? defaultValue, JsonDecoderReviver? reviver}) {
-    return JsonModelResponseParser<T>().parse(this, factoryMethod, defaultValue: defaultValue, reviver: reviver);
+    return JsonModelResponseParser<T>(factoryMethod, defaultValue: defaultValue, reviver: reviver).parse(this);
   }
 
   List<T>? listJsonModel<T>(JsonModelFactory<T> factoryMethod, {List<T>? defaultValue, JsonDecoderReviver? reviver}) {
-    return ListJsonModelResponseParser<T>().parse(this, factoryMethod, defaultValue: defaultValue, reviver: reviver);
+    return ListJsonModelResponseParser<T>(factoryMethod, defaultValue: defaultValue, reviver: reviver).parse(this);
   }
 }
 
