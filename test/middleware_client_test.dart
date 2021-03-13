@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:http_middleware/http_middleware.dart';
+import 'package:http_middleware/src/base_client_mixin.dart';
 import 'package:http_middleware/src/middlewares/handler_middleware.dart';
 import 'package:test/test.dart';
 
@@ -16,6 +17,24 @@ void main() {
       expect(() => mClient.middlewares[2] = m, throwsUnsupportedError);
       expect(() => mClient.middlewares.add(m), throwsUnsupportedError);
       expect(MiddlewareClient.build(mClient, [m, m]).middlewares.length, 5);
+    });
+  });
+
+  group('intercept send methods', () {
+    test('send methods', () async {
+      http.BaseResponse? interceptedResponse;
+      final client = MiddlewareClient.build(mockClient, [
+        HandlersMiddleware(responseHandler: (http.BaseResponse r) {
+          interceptedResponse = r;
+        }),
+      ]);
+      expect(await client.sendClient(createRequest('GET', url, null)), isA<http.StreamedResponse>());
+      expect(interceptedResponse, null);
+
+      await client.send(createRequest('GET', url, null));
+      expect(interceptedResponse, isA<http.StreamedResponse>());
+      await client.sendNonStreamedResponse(createRequest('GET', url, null));
+      expect(interceptedResponse, isA<http.Response>());
     });
   });
 
@@ -47,6 +66,17 @@ void main() {
       );
       await client.get(url);
       expect(orderList, ['m3:request', 'm1:request', 'm2:request', 'm2:response', 'm1:response', 'm3:response']);
+    });
+
+    test('headers client', () async {
+      Map<String, String>? headers;
+      final client = MiddlewareClient.build(HeadersClient(headers: {'test': 'test'}, client: mockClient), [
+        HandlersMiddleware(requestHandler: (http.BaseRequest r) {
+          headers = r.headers;
+        }),
+      ]);
+      await client.get(url);
+      expect(headers, {'test': 'test'});
     });
   });
 }
