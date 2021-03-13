@@ -13,7 +13,10 @@ Uri mergeUrlQueryParameters(dynamic url, Map<String, dynamic /*String|Iterable<S
     if (value == null || value is String) {
       values.add(value ?? '');
     } else {
-      values.addAll(value);
+      Iterable list = value;
+      for (final val in list) {
+        values.add(val ?? '');
+      }
     }
     if (values.isEmpty) values.add('');
   });

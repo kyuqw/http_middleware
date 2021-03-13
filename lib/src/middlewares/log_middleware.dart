@@ -1,4 +1,3 @@
-import 'package:http/http.dart' show BaseRequest, Request, BaseResponse, Response;
 import 'package:meta/meta.dart';
 
 import '../middleware.dart';
@@ -39,7 +38,7 @@ class LogMiddleware extends Middleware {
   void printRequest(BaseRequest request) {
     final sb = StringBuffer();
     sb.writeln('${request.method} ${request.url}');
-    if (logRequestHeaders && (request.headers?.isNotEmpty ?? false)) sb.writeln('headers: ${request.headers}');
+    if (logRequestHeaders && request.headers.isNotEmpty) sb.writeln('headers: ${request.headers}');
     if (logRequestBody && request is Request && request.contentLength > 0) sb.writeln('body: ${request.body}');
     logMethod(sb.toString());
   }
@@ -48,9 +47,10 @@ class LogMiddleware extends Middleware {
   void printResponse(BaseResponse response) {
     final sb = StringBuffer();
     final request = response.request;
-    sb.writeln('${response.statusCode} ${request.method} ${request.url}');
-    if (logResponseHeaders && (response.headers?.isNotEmpty ?? false)) sb.writeln('headers: ${response.headers}');
-    if (logResponseBody && response is Response && response.contentLength > 0) sb.writeln('body: ${response.body}');
+    sb.writeln('${response.statusCode} ${request?.method} ${request?.url}');
+    if (logResponseHeaders && response.headers.isNotEmpty) sb.writeln('headers: ${response.headers}');
+    if (logResponseBody && response is Response && response.contentLength != null && response.contentLength! > 0)
+      sb.writeln('body: ${response.body}');
     logMethod(sb.toString());
   }
 }

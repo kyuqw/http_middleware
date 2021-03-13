@@ -25,7 +25,8 @@ mixin BaseClientMixin implements BaseClient {
       sendNonStreamed('PATCH', url, headers, body, encoding);
 
   @override
-  Future<Response> delete(url, {Map<String, String>? headers}) => sendNonStreamed('DELETE', url, headers);
+  Future<Response> delete(url, {Map<String, String>? headers, Object? body, Encoding? encoding}) =>
+      sendNonStreamed('DELETE', url, headers, body, encoding);
 
   /// Sends a non-streaming [Request] and returns a non-streaming [Response].
   ///

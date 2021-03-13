@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   final mockClient = MockClient((request) async => http.Response('response: ${request.body}', 200, request: request));
-  const url = 'http://example.com';
+  final url = Uri.parse('http://example.com');
   group('middleware()', () {
     test('middlewares list', () {
       expect(MiddlewareClient.build(mockClient, []).middlewares.length, 0);

@@ -1,6 +1,3 @@
-import 'package:http/http.dart'
-    show BaseRequest, Request, StreamedRequest, MultipartRequest, BaseResponse, Response, StreamedResponse;
-
 import '../middleware.dart';
 
 typedef RequestHandler<T extends BaseRequest> = FutureOr<BaseRequest>? Function(T request);

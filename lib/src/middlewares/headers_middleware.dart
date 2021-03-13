@@ -1,4 +1,3 @@
-import 'package:http/http.dart' show BaseRequest;
 import 'package:meta/meta.dart';
 
 import '../middleware.dart';

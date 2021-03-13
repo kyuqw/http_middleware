@@ -5,7 +5,8 @@ import 'package:http/http.dart'
 
 export 'dart:async' show FutureOr;
 
-// TODO: export Request and Response
+export 'package:http/http.dart'
+    show BaseRequest, Request, StreamedRequest, MultipartRequest, BaseResponse, Response, StreamedResponse;
 
 typedef MiddlewareNextHandler = FutureOr<BaseResponse> Function(BaseRequest);
 
