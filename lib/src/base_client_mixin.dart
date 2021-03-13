@@ -42,8 +42,8 @@ mixin BaseClientMixin implements BaseClient {
 }
 
 /// Create a non-streaming [Request] from params.
-Request createRequest(String method, url, Map<String, String>? headers, [body, Encoding? encoding]) {
-  var request = Request(method, urlFromUriOrString(url));
+Request createRequest(String method, url, [Map<String, String>? headers, body, Encoding? encoding]) {
+  final request = Request(method, urlFromUriOrString(url));
 
   if (headers != null) request.headers.addAll(headers);
   if (encoding != null) request.encoding = encoding;
