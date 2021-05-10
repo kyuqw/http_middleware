@@ -18,6 +18,16 @@ void main() {
       expect(() => mClient.middlewares.add(m), throwsUnsupportedError);
       expect(MiddlewareClient.build(mClient, [m, m]).middlewares.length, 5);
     });
+
+    test('middleware close', () {
+      var catchOnClose = 0;
+      final client = MiddlewareClient.build(mockClient, [
+        HandlersMiddleware(onClose: () => catchOnClose++),
+        HandlersMiddleware(onClose: () => catchOnClose++),
+      ]);
+      client.close();
+      expect(catchOnClose, 2);
+    });
   });
 
   group('intercept send methods', () {

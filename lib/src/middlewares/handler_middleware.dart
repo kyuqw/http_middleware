@@ -7,9 +7,10 @@ typedef ResponseHandler<T extends BaseResponse> = FutureOr<BaseResponse>? Functi
 class HandlersMiddleware<Req extends BaseRequest, Res extends BaseResponse> extends GenericMiddleware<Req, Res> {
   final RequestHandler<Req>? requestHandler;
   final ResponseHandler<Res>? responseHandler;
+  final Function()? onClose;
 
-  HandlersMiddleware({this.requestHandler, this.responseHandler})
-      : assert(requestHandler != null || responseHandler != null);
+  HandlersMiddleware({this.requestHandler, this.responseHandler, this.onClose})
+      : assert(requestHandler != null || responseHandler != null || onClose != null);
 
   @override
   FutureOr<BaseRequest> interceptRequestHandler(Req request) async {
@@ -19,6 +20,11 @@ class HandlersMiddleware<Req extends BaseRequest, Res extends BaseResponse> exte
   @override
   FutureOr<BaseResponse> interceptResponseHandler(Res response) {
     return responseHandler?.call(response) ?? super.interceptResponseHandler(response);
+  }
+
+  @override
+  void close() {
+    onClose?.call();
   }
 }
 

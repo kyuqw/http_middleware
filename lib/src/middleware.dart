@@ -12,6 +12,7 @@ typedef MiddlewareNextHandler = FutureOr<BaseResponse> Function(BaseRequest);
 
 /// A base middleware class used by [MiddlewareClient] to intercept [BaseRequest] and [BaseResponse].
 abstract class Middleware {
+  // TODO: add const constructor???
   /// main method to interact with [Middleware] class.
   FutureOr<BaseResponse> send(BaseRequest request, MiddlewareNextHandler next) async {
     final req = await interceptRequest(request);
@@ -29,6 +30,8 @@ abstract class Middleware {
   FutureOr<BaseResponse> interceptResponse(BaseResponse response) {
     return response;
   }
+
+  void close() {}
 }
 
 /// Generic class to intercept [Req] type requests and [Res] type responses.

@@ -68,12 +68,14 @@ class MiddlewareClient extends http.BaseClient with BaseClientMixin {
 
   @override
   void close() {
-    client.close();
+    middlewareChain.close();
   }
 }
 
 abstract class BaseMiddlewareChain {
   FutureOr<http.BaseResponse> send(http.BaseRequest request);
+
+  void close() {}
 }
 
 class ClientMiddlewareChain extends BaseMiddlewareChain {
@@ -85,13 +87,18 @@ class ClientMiddlewareChain extends BaseMiddlewareChain {
   FutureOr<http.BaseResponse> send(http.BaseRequest request) {
     return client.send(request);
   }
+
+  @override
+  void close() {
+    client.close();
+  }
 }
 
 class MiddlewareChain extends BaseMiddlewareChain {
   @protected
   final Middleware middleware;
   @protected
-  BaseMiddlewareChain nextHandler;
+  final BaseMiddlewareChain nextHandler;
 
   MiddlewareChain(this.middleware, this.nextHandler);
 
@@ -100,8 +107,10 @@ class MiddlewareChain extends BaseMiddlewareChain {
     return middleware.send(request, nextHandler.send);
   }
 
-  void setNextHandler(BaseMiddlewareChain next) {
-    nextHandler = next;
+  @override
+  void close() {
+    middleware.close();
+    nextHandler.close();
   }
 }
 
